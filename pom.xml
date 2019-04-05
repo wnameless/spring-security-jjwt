@@ -13,7 +13,7 @@
 	</parent>
 
 	<name>spring-security-jjwt</name>
-	<description>Integrate the Java JSON Token(jjwt) library into Spring Security</description>
+	<description>Integrate the Java JSON Web Token(jjwt) library into Spring Security</description>
 	<url>https://github.com/wnameless/spring-security-jjwt</url>
 
 	<licenses>
