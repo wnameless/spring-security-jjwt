@@ -12,7 +12,7 @@ Make web API protection by JWT in Spring Security like a breeze
 <dependency>
 	<groupId>com.github.wnameless.spring</groupId>
 	<artifactId>spring-security-jjwt</artifactId>
-	<version>0.1.0</version>
+	<version>0.1.1</version>
 </dependency>
 ```
 
