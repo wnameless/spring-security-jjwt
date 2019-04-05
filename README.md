@@ -5,7 +5,7 @@ spring-security-jjwt
 Integrate the Java JSON Web Token(jjwt) library into Spring Security
 
 ## Purpose
-Make protecting web APIs by JWT in Spring Security like a breeze
+Make web API protection by JWT in Spring Security like a breeze
 
 # Maven Repo
 ```xml
