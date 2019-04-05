@@ -15,6 +15,8 @@
  */
 package com.github.wnameless.spring.security.jjwt;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,25 +34,29 @@ final class InternalJwtSecurityProperties implements SecurityProperties {
       "9z$C&F)H@McQfTjWnZr4u7x!A%D*G-KaNdRgUkXp2s5v8y/B?E(H+MbQeShVmYq3";
   private static final long defaultJwtExpiration = 604800000;
 
-  private final String jwtAuthUrl;
-  private final String jwtSecret;
-  private final long jwtExpiration;
+  private String jwtAuthUrl;
+  private String jwtSecret;
+  private long jwtExpiration;
+
+  @Autowired(required = false)
+  private JwtSecurityProperties jwtSecurityProperties;
 
   InternalJwtSecurityProperties(
       @Value("${jwt.auth-url:" + defaultAuthUrl + "}") String jwtAuthUrl,
       @Value("${jwt.secret:" + defaultJwtSecret + "}") String jwtSecret,
       @Value("${jwt.expiration:" + defaultJwtExpiration
-          + "}") long jwtExpiration,
-      @Autowired(
-          required = false) JwtSecurityProperties jwtSecurityProperties) {
+          + "}") long jwtExpiration) {
+    this.jwtAuthUrl = jwtAuthUrl;
+    this.jwtSecret = jwtSecret;
+    this.jwtExpiration = jwtExpiration;
+  }
+
+  @PostConstruct
+  private void init() {
     if (jwtSecurityProperties != null) {
-      this.jwtAuthUrl = jwtSecurityProperties.getJwtAuthUrl();
-      this.jwtSecret = jwtSecurityProperties.getJwtSecret();
-      this.jwtExpiration = jwtSecurityProperties.getJwtExpiration();
-    } else {
-      this.jwtAuthUrl = jwtAuthUrl;
-      this.jwtSecret = jwtSecret;
-      this.jwtExpiration = jwtExpiration;
+      jwtAuthUrl = jwtSecurityProperties.getJwtAuthUrl();
+      jwtSecret = jwtSecurityProperties.getJwtSecret();
+      jwtExpiration = jwtSecurityProperties.getJwtExpiration();
     }
 
     if (jwtAuthUrl.equals(defaultAuthUrl)) {
