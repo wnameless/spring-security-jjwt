@@ -44,7 +44,7 @@ import io.jsonwebtoken.security.Keys;
 /**
  * 
  * {@link JwtAuthenticationFilter} filters provided url and authenticates the
- * both url parameters <b>username</b> & <b>password</b> with given
+ * both url parameters <b>username</b> &amp; <b>password</b> with given
  * {@link AuthenticationManager}. If the authentication is success, it returns a
  * JWT string in response body.
  *
