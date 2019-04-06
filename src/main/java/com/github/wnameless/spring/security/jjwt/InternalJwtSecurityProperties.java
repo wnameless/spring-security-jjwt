@@ -34,22 +34,17 @@ final class InternalJwtSecurityProperties implements SecurityProperties {
       "9z$C&F)H@McQfTjWnZr4u7x!A%D*G-KaNdRgUkXp2s5v8y/B?E(H+MbQeShVmYq3";
   private static final long defaultJwtExpiration = 604800000;
 
+  @Value("${jwt.auth-url:" + defaultAuthUrl + "}")
   private String jwtAuthUrl;
+
+  @Value("${jwt.secret:" + defaultJwtSecret + "}")
   private String jwtSecret;
+
+  @Value("${jwt.expiration:" + defaultJwtExpiration + "}")
   private long jwtExpiration;
 
   @Autowired(required = false)
   private JwtSecurityProperties jwtSecurityProperties;
-
-  InternalJwtSecurityProperties(
-      @Value("${jwt.auth-url:" + defaultAuthUrl + "}") String jwtAuthUrl,
-      @Value("${jwt.secret:" + defaultJwtSecret + "}") String jwtSecret,
-      @Value("${jwt.expiration:" + defaultJwtExpiration
-          + "}") long jwtExpiration) {
-    this.jwtAuthUrl = jwtAuthUrl;
-    this.jwtSecret = jwtSecret;
-    this.jwtExpiration = jwtExpiration;
-  }
 
   @PostConstruct
   private void init() {
