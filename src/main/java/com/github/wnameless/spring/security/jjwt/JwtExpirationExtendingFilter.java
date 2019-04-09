@@ -19,7 +19,9 @@ import static com.github.wnameless.spring.security.jjwt.JwtTokenConstants.TOKEN_
 import static com.github.wnameless.spring.security.jjwt.JwtTokenConstants.TOKEN_PREFIX;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.servlet.FilterChain;
@@ -46,23 +48,23 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 
-/**
- * 
- * {@link JwtAuthorizationFilter} filters the JWT header in the request. If the
- * token in the JWT header is valid, the request is authenticated automatically.
- *
- */
-public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
+public class JwtExpirationExtendingFilter extends BasicAuthenticationFilter {
 
   private static final Logger log =
-      LoggerFactory.getLogger(JwtAuthorizationFilter.class);
+      LoggerFactory.getLogger(JwtExpirationExtendingFilter.class);
 
   private final byte[] signingKey;
+  private final JwtExpirationExtendingService jwtExpirationExtendingService;
+  private final JwtExpirationExtendingPolicy jwtExpirationExtendingPolicy;
 
-  public JwtAuthorizationFilter(AuthenticationManager authenticationManager,
-      String jwtSecret) {
+  public JwtExpirationExtendingFilter(
+      AuthenticationManager authenticationManager, String jwtSecret,
+      JwtExpirationExtendingService jwtExpirationExtendingService,
+      JwtExpirationExtendingPolicy jwtExpirationExtendingPolicy) {
     super(authenticationManager);
     signingKey = jwtSecret.getBytes();
+    this.jwtExpirationExtendingService = jwtExpirationExtendingService;
+    this.jwtExpirationExtendingPolicy = jwtExpirationExtendingPolicy;
   }
 
   @Override
@@ -90,12 +92,30 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
         String username = parsedToken.getBody().getSubject();
         if (!StringUtils.isEmpty(username)) {
+          jwtExpirationExtendingService.setTokenLastLoginTime(token);
+
           return new UsernamePasswordAuthenticationToken(username, null,
               authorities(parsedToken.getBody()));
         }
       } catch (ExpiredJwtException exception) {
         log.warn("Parse expired JWT : {} failed : {}", token,
             exception.getMessage());
+
+        String username = exception.getClaims().getSubject();
+        if (StringUtils.isEmpty(username)) return null;
+
+        Date lastLoginTime =
+            jwtExpirationExtendingService.getTokenLastLoginTime(username);
+        if (jwtExpirationExtendingPolicy.apply(exception.getClaims(),
+            Optional.ofNullable(lastLoginTime))) {
+          jwtExpirationExtendingService.setTokenLastLoginTime(token);
+
+          log.info("Extend expired JWT : {}", token);
+          return new UsernamePasswordAuthenticationToken(username, null,
+              authorities(exception.getClaims()));
+        } else {
+          jwtExpirationExtendingService.deleteTokenLastLoginTime(token);
+        }
       } catch (UnsupportedJwtException exception) {
         log.warn("Parse unsupported JWT : {} failed : {}", token,
             exception.getMessage());

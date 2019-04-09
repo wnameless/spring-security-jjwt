@@ -15,6 +15,8 @@
  */
 package com.github.wnameless.spring.security.jjwt;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -76,15 +78,38 @@ public abstract class AbstractJwtSecurityConfiguration
   @Autowired
   private InternalJwtSecurityProperties jwtSecurityProps;
 
+  @Autowired(required = false)
+  private JwtExpirationExtendingService jwtExpirationExtendingService;
+
+  @Autowired(required = false)
+  private JwtExpirationExtendingPolicy jwtExpirationExtendingPolicy;
+
+  @PostConstruct
+  private void init() {
+    if (jwtExpirationExtendingPolicy != null
+        && jwtExpirationExtendingService == null) {
+      jwtExpirationExtendingService =
+          new MemoryDBJwtExpirationExtendingService();
+    }
+  }
+
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http.cors().configurationSource(corsConfigurationSource()).and() //
-        .csrf().disable()
-        .addFilter(new JwtAuthenticationFilter(authenticationManager(),
-            jwtSecurityProps.getJwtAuthUrl(), jwtSecurityProps.getJwtSecret(),
+        .csrf().disable().addFilter(new JwtAuthenticationFilter( //
+            authenticationManager(), //
+            jwtSecurityProps.getJwtAuthUrl(), //
+            jwtSecurityProps.getJwtSecret(), //
             jwtSecurityProps.getJwtExpiration()))
-        .addFilter(new JwtAuthorizationFilter(authenticationManager(),
-            jwtSecurityProps.getJwtSecret()))
+        .addFilter(jwtExpirationExtendingPolicy == null
+            ? new JwtAuthorizationFilter( //
+                authenticationManager(), //
+                jwtSecurityProps.getJwtSecret())
+            : new JwtExpirationExtendingFilter( //
+                authenticationManager(), //
+                jwtSecurityProps.getJwtSecret(), //
+                jwtExpirationExtendingService, //
+                jwtExpirationExtendingPolicy))
         .sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
   }

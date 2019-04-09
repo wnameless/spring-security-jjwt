@@ -56,13 +56,13 @@ public class JwtAuthenticationFilter
       LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
   private final AuthenticationManager authenticationManager;
-  private final String jwtSecret;
+  private final byte[] signingKey;
   private final long jwtExpiration;
 
   public JwtAuthenticationFilter(AuthenticationManager authenticationManager,
       String jwtAuthUrl, String jwtSecret, long jwtExpiration) {
     this.authenticationManager = authenticationManager;
-    this.jwtSecret = jwtSecret;
+    signingKey = jwtSecret.getBytes();
     this.jwtExpiration = jwtExpiration;
 
     setFilterProcessesUrl(jwtAuthUrl);
@@ -87,8 +87,6 @@ public class JwtAuthenticationFilter
 
     List<String> roles = user.getAuthorities().stream()
         .map(GrantedAuthority::getAuthority).collect(Collectors.toList());
-
-    byte[] signingKey = jwtSecret.getBytes();
 
     String token = Jwts.builder()
         .signWith(Keys.hmacShaKeyFor(signingKey), SignatureAlgorithm.HS512)
