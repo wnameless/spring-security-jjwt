@@ -52,9 +52,4 @@ public class MapDBJwtExpirationExtendingService
     map.put(token, new Date());
   }
 
-  @Override
-  public Date deleteTokenLastLoginTime(String token) {
-    return map.remove(token);
-  }
-
 }

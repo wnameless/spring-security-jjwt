@@ -79,6 +79,7 @@ public class JwtExpirationExtendingFilter extends BasicAuthenticationFilter {
 
     Authentication authentication = getAuthentication(request);
     SecurityContextHolder.getContext().setAuthentication(authentication);
+    jwtExpirationExtendingService.setTokenLastLoginTime(header);
     filterChain.doFilter(request, response);
   }
 
@@ -92,8 +93,6 @@ public class JwtExpirationExtendingFilter extends BasicAuthenticationFilter {
 
         String username = parsedToken.getBody().getSubject();
         if (!StringUtils.isEmpty(username)) {
-          jwtExpirationExtendingService.setTokenLastLoginTime(token);
-
           return new UsernamePasswordAuthenticationToken(username, null,
               authorities(parsedToken.getBody()));
         }
@@ -108,13 +107,9 @@ public class JwtExpirationExtendingFilter extends BasicAuthenticationFilter {
             jwtExpirationExtendingService.getTokenLastLoginTime(username);
         if (jwtExpirationExtendingPolicy.apply(exception.getClaims(),
             Optional.ofNullable(lastLoginTime))) {
-          jwtExpirationExtendingService.setTokenLastLoginTime(token);
-
           log.info("Extend expired JWT : {}", token);
           return new UsernamePasswordAuthenticationToken(username, null,
               authorities(exception.getClaims()));
-        } else {
-          jwtExpirationExtendingService.deleteTokenLastLoginTime(token);
         }
       } catch (UnsupportedJwtException exception) {
         log.warn("Parse unsupported JWT : {} failed : {}", token,

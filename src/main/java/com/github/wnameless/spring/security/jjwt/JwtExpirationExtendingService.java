@@ -23,6 +23,4 @@ public interface JwtExpirationExtendingService {
 
   void setTokenLastLoginTime(String token);
 
-  Date deleteTokenLastLoginTime(String token);
-
 }
