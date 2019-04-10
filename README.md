@@ -112,7 +112,7 @@ public JwtSecurityProperties jwtSecurityProperties() {
 ```
 
 Since v0.2.0, JWT expiration extending service has been added<br>
-Following config allows expired JWT claims to be extended, if this token has been used in past 2 days
+Following config allows expired JWT claims to be extended, if the token was used in past 2 days
 ```java
 @Bean
 JwtExpirationExtendingPolicy jwtExpirationExtendingPolicy() {
@@ -127,7 +127,7 @@ JwtExpirationExtendingPolicy jwtExpirationExtendingPolicy() {
 }
 ```
 
-By default, the JwtExpirationExtendingService wipes out all records of last logins which are outdated for 2 weeks<br>
+By default, the JwtExpirationExtendingService wipes out all last-login records which are outdated for 2 weeks<br>
 However you can provide your JwtExpirationExtendingService to meet your need in JwtExpirationExtendingPolicy
 ```java
 @Bean
