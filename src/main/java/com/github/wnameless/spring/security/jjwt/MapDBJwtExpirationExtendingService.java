@@ -49,6 +49,22 @@ public class MapDBJwtExpirationExtendingService
   }
 
   /**
+   * Creates a {@link MapDBJwtExpirationExtendingService} with a data expiration
+   * time in milliseconds.
+   * 
+   * @param expireInMillis
+   *          the expiration time in milliseconds after any record has been
+   *          updated or created
+   */
+  public MapDBJwtExpirationExtendingService(long expireInMillis) {
+    this.db = DBMaker.memoryDB().make();
+    jwtLastLogin =
+        this.db.hashMap("jwtLastLogin", Serializer.STRING, Serializer.DATE)
+            .expireAfterCreate(expireInMillis, TimeUnit.MILLISECONDS)
+            .expireAfterUpdate(expireInMillis, TimeUnit.MILLISECONDS).create();
+  }
+
+  /**
    * Creates a {@link MapDBJwtExpirationExtendingService} by given MapDB
    * {@link DB} and a data expiration time in milliseconds.
    * 
