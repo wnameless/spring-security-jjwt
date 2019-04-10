@@ -21,10 +21,27 @@ import java.util.function.BiFunction;
 
 import io.jsonwebtoken.Claims;
 
+/**
+ * 
+ * {@link JwtExpirationExtendingPolicy} is used to describe the logic whether to
+ * extend an expired JWT or not.
+ *
+ */
 @FunctionalInterface
 public interface JwtExpirationExtendingPolicy
     extends BiFunction<Claims, Optional<Date>, Boolean> {
 
+  /**
+   * Returns true if the given expired JWT {@link Claims} can be extended, false
+   * otherwise.
+   * 
+   * @param jwtClaims
+   *          a expired JWT {@link Claims}
+   * @param lastLoginTime
+   *          the last login time of given JWT
+   * @return true if the given expired JWT {@link Claims} can be extended, false
+   *         otherwise
+   */
   @Override
   Boolean apply(Claims jwtClaims, Optional<Date> lastLoginTime);
 

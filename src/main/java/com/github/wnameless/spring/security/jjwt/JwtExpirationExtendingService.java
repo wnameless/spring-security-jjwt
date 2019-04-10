@@ -17,10 +17,29 @@ package com.github.wnameless.spring.security.jjwt;
 
 import java.util.Date;
 
+/**
+ * 
+ * {@link JwtExpirationExtendingService} provides an interface to document the
+ * last login activity of a JWT.
+ *
+ */
 public interface JwtExpirationExtendingService {
 
+  /**
+   * Returns the last login time of given JWT.
+   * 
+   * @param token
+   *          the JWT stored in the header
+   * @return the last login time of given JWT
+   */
   Date getTokenLastLoginTime(String token);
 
+  /**
+   * Sets current time as the last login time of given JWT.
+   * 
+   * @param token
+   *          the JWT stored in the header
+   */
   void setTokenLastLoginTime(String token);
 
 }

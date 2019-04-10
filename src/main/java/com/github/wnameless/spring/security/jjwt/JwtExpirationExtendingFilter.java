@@ -48,6 +48,15 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 
+/**
+ * 
+ * {@link JwtExpirationExtendingFilter} filters the JWT header in the request.
+ * If the token in the JWT header is valid, the request is authenticated
+ * automatically. If the JWT header is expired and the
+ * {@link JwtExpirationExtendingPolicy} is provided, the expired JWT will be
+ * checked if it can be extended.
+ *
+ */
 public class JwtExpirationExtendingFilter extends BasicAuthenticationFilter {
 
   private static final Logger log =

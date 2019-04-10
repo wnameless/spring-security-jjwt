@@ -24,49 +24,46 @@ import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.mapdb.Serializer;
 
+/**
+ * 
+ * {@link MapDBJwtExpirationExtendingService} is an implementation of
+ * {@link JwtExpirationExtendingService} based on the MapDB library.
+ *
+ */
 public class MapDBJwtExpirationExtendingService
     implements JwtExpirationExtendingService {
-
-  public enum ExpireAfter {
-    CREATE, UPDATE, GET;
-  }
 
   private final DB db;
   private final ConcurrentMap<String, Date> jwtLastLogin;
 
+  /**
+   * Creates a {@link MapDBJwtExpirationExtendingService} with in-memory DB and
+   * a 14-days data expiration after any record has been updated or created.
+   */
   public MapDBJwtExpirationExtendingService() {
     db = DBMaker.memoryDB().make();
     jwtLastLogin =
         db.hashMap("jwtLastLogin", Serializer.STRING, Serializer.DATE)
+            .expireAfterCreate(14, TimeUnit.DAYS)
             .expireAfterUpdate(14, TimeUnit.DAYS).create();
   }
 
-  public MapDBJwtExpirationExtendingService(DB db, ExpireAfter expireAfter,
-      long milliseconds) {
+  /**
+   * Creates a {@link MapDBJwtExpirationExtendingService} by given MapDB
+   * {@link DB} and a data expiration time in milliseconds.
+   * 
+   * @param db
+   *          a MapDB {@link DB}
+   * @param expireInMillis
+   *          the expiration time in milliseconds after any record has been
+   *          updated or created
+   */
+  public MapDBJwtExpirationExtendingService(DB db, long expireInMillis) {
     this.db = Objects.requireNonNull(db);
-
-    Objects.requireNonNull(expireAfter);
-    switch (expireAfter) {
-      case CREATE:
-        jwtLastLogin = db
-            .hashMap("jwtLastLogin", Serializer.STRING, Serializer.DATE)
-            .expireAfterCreate(milliseconds, TimeUnit.MILLISECONDS).create();
-        break;
-      case UPDATE:
-        jwtLastLogin = db
-            .hashMap("jwtLastLogin", Serializer.STRING, Serializer.DATE)
-            .expireAfterUpdate(milliseconds, TimeUnit.MILLISECONDS).create();
-        break;
-      case GET:
-        jwtLastLogin =
-            db.hashMap("jwtLastLogin", Serializer.STRING, Serializer.DATE)
-                .expireAfterGet(milliseconds, TimeUnit.MILLISECONDS).create();
-        break;
-      default:
-        jwtLastLogin = db
-            .hashMap("jwtLastLogin", Serializer.STRING, Serializer.DATE)
-            .expireAfterUpdate(milliseconds, TimeUnit.MILLISECONDS).create();
-    }
+    jwtLastLogin =
+        this.db.hashMap("jwtLastLogin", Serializer.STRING, Serializer.DATE)
+            .expireAfterCreate(expireInMillis, TimeUnit.MILLISECONDS)
+            .expireAfterUpdate(expireInMillis, TimeUnit.MILLISECONDS).create();
   }
 
   @Override
