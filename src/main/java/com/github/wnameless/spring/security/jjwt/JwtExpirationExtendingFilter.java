@@ -104,7 +104,7 @@ public class JwtExpirationExtendingFilter extends BasicAuthenticationFilter {
         if (StringUtils.isEmpty(username)) return null;
 
         Date lastLoginTime =
-            jwtExpirationExtendingService.getTokenLastLoginTime(username);
+            jwtExpirationExtendingService.getTokenLastLoginTime(token);
         if (jwtExpirationExtendingPolicy.apply(exception.getClaims(),
             Optional.ofNullable(lastLoginTime))) {
           log.info("Extend expired JWT : {}", token);

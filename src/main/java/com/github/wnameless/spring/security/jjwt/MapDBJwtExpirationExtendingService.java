@@ -32,13 +32,13 @@ public class MapDBJwtExpirationExtendingService
 
   public MapDBJwtExpirationExtendingService() {
     db = DBMaker.memoryDB().make();
-    map = db.hashMap("map", Serializer.STRING, Serializer.DATE)
+    map = db.hashMap("cache", Serializer.STRING, Serializer.DATE)
         .expireAfterUpdate(14, TimeUnit.DAYS).create();
   }
 
   public MapDBJwtExpirationExtendingService(DB db, long expiration) {
     this.db = Objects.requireNonNull(db);
-    map = db.hashMap("map", Serializer.STRING, Serializer.DATE)
+    map = db.hashMap("cache", Serializer.STRING, Serializer.DATE)
         .expireAfterUpdate(expiration, TimeUnit.MILLISECONDS).create();
   }
 
