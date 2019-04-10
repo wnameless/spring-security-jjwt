@@ -16,18 +16,31 @@
 package com.github.wnameless.spring.security.jjwt;
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.mapdb.Serializer;
 
-public class MemoryDBJwtExpirationExtendingService
+public class MapDBJwtExpirationExtendingService
     implements JwtExpirationExtendingService {
 
-  private DB db = DBMaker.memoryDB().make();
-  private ConcurrentMap<String, Date> map =
-      db.hashMap("map", Serializer.STRING, Serializer.DATE).create();
+  private final DB db;
+  private final ConcurrentMap<String, Date> map;
+
+  public MapDBJwtExpirationExtendingService() {
+    db = DBMaker.memoryDB().make();
+    map = db.hashMap("map", Serializer.STRING, Serializer.DATE)
+        .expireAfterUpdate(14, TimeUnit.DAYS).create();
+  }
+
+  public MapDBJwtExpirationExtendingService(DB db, long expiration) {
+    this.db = Objects.requireNonNull(db);
+    map = db.hashMap("map", Serializer.STRING, Serializer.DATE)
+        .expireAfterUpdate(expiration, TimeUnit.MILLISECONDS).create();
+  }
 
   @Override
   public Date getTokenLastLoginTime(String token) {

@@ -89,7 +89,7 @@ public abstract class AbstractJwtSecurityConfiguration
     if (jwtExpirationExtendingPolicy != null
         && jwtExpirationExtendingService == null) {
       jwtExpirationExtendingService =
-          new MemoryDBJwtExpirationExtendingService();
+          new MapDBJwtExpirationExtendingService();
     }
   }
 
