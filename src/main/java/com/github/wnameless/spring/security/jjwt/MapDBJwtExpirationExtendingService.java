@@ -28,28 +28,30 @@ public class MapDBJwtExpirationExtendingService
     implements JwtExpirationExtendingService {
 
   private final DB db;
-  private final ConcurrentMap<String, Date> map;
+  private final ConcurrentMap<String, Date> jwtLastLogin;
 
   public MapDBJwtExpirationExtendingService() {
     db = DBMaker.memoryDB().make();
-    map = db.hashMap("cache", Serializer.STRING, Serializer.DATE)
-        .expireAfterUpdate(14, TimeUnit.DAYS).create();
+    jwtLastLogin =
+        db.hashMap("jwtLastLogin", Serializer.STRING, Serializer.DATE)
+            .expireAfterUpdate(14, TimeUnit.DAYS).create();
   }
 
   public MapDBJwtExpirationExtendingService(DB db, long expiration) {
     this.db = Objects.requireNonNull(db);
-    map = db.hashMap("cache", Serializer.STRING, Serializer.DATE)
-        .expireAfterUpdate(expiration, TimeUnit.MILLISECONDS).create();
+    jwtLastLogin =
+        db.hashMap("jwtLastLogin", Serializer.STRING, Serializer.DATE)
+            .expireAfterUpdate(expiration, TimeUnit.MILLISECONDS).create();
   }
 
   @Override
   public Date getTokenLastLoginTime(String token) {
-    return map.get(token);
+    return jwtLastLogin.get(token);
   }
 
   @Override
   public void setTokenLastLoginTime(String token) {
-    map.put(token, new Date());
+    jwtLastLogin.put(token, new Date());
   }
 
 }
