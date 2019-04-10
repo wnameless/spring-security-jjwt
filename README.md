@@ -112,7 +112,9 @@ public JwtSecurityProperties jwtSecurityProperties() {
 ```
 
 Since v0.2.0, JWT expiration extending service has been added<br>
-Following config allows expired JWT claims to be extended, if the token was used in past 2 days
+JwtExpirationExtendingPolicy is called when any JWT is expired<br>
+<br>
+Following example config shows how to extend an expired JWT, only if the token was used in past 2 days
 ```java
 @Bean
 JwtExpirationExtendingPolicy jwtExpirationExtendingPolicy() {
