@@ -12,7 +12,7 @@ Make web API protection by JWT in Spring Security like a breeze
 <dependency>
 	<groupId>com.github.wnameless.spring</groupId>
 	<artifactId>spring-security-jjwt</artifactId>
-	<version>0.1.1</version>
+	<version>0.2.0</version>
 </dependency>
 ```
 
@@ -108,5 +108,31 @@ public JwtSecurityProperties jwtSecurityProperties() {
       "/api/login",
       "QeThWmZq4t7w!z%C*F-JaNdRgUjXn2r5u8x/A?D(G+KbPeShVmYp3s6v9y$B&E)H",
       432000000);
+}
+```
+
+Since v0.2.0, JWT expiration extending service has been added<br>
+Following config allows expired JWT claims to be extended, if this token has been used in past 2 days
+```java
+@Bean
+JwtExpirationExtendingPolicy jwtExpirationExtendingPolicy() {
+  return (jwtClaims, lastLoginTime) -> {
+    if (lastLoginTime.isPresent()) {
+      return new Date().getTime() - lastLoginTime.get()
+          .getTime() < TimeUnit.MILLISECONDS.convert(2, TimeUnit.DAYS);
+    } else {
+      return false;
+    }
+  };
+}
+```
+
+By default, the JwtExpirationExtendingService wipes out all records of last logins which are outdated for 2 weeks<br>
+However you can provide your JwtExpirationExtendingService to meet your need in JwtExpirationExtendingPolicy
+```java
+@Bean
+JwtExpirationExtendingService jwtExpirationExtendingService() {
+  return new MapDBJwtExpirationExtendingService(
+      TimeUnit.MICROSECONDS.convert(180, TimeUnit.DAYS));
 }
 ```
