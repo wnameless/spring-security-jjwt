@@ -27,6 +27,10 @@ import org.mapdb.Serializer;
 public class MapDBJwtExpirationExtendingService
     implements JwtExpirationExtendingService {
 
+  public enum ExpireAfter {
+    CREATE, UPDATE, GET;
+  }
+
   private final DB db;
   private final ConcurrentMap<String, Date> jwtLastLogin;
 
@@ -37,11 +41,32 @@ public class MapDBJwtExpirationExtendingService
             .expireAfterUpdate(14, TimeUnit.DAYS).create();
   }
 
-  public MapDBJwtExpirationExtendingService(DB db, long expiration) {
+  public MapDBJwtExpirationExtendingService(DB db, ExpireAfter expireAfter,
+      long milliseconds) {
     this.db = Objects.requireNonNull(db);
-    jwtLastLogin =
-        db.hashMap("jwtLastLogin", Serializer.STRING, Serializer.DATE)
-            .expireAfterUpdate(expiration, TimeUnit.MILLISECONDS).create();
+
+    Objects.requireNonNull(expireAfter);
+    switch (expireAfter) {
+      case CREATE:
+        jwtLastLogin = db
+            .hashMap("jwtLastLogin", Serializer.STRING, Serializer.DATE)
+            .expireAfterCreate(milliseconds, TimeUnit.MILLISECONDS).create();
+        break;
+      case UPDATE:
+        jwtLastLogin = db
+            .hashMap("jwtLastLogin", Serializer.STRING, Serializer.DATE)
+            .expireAfterUpdate(milliseconds, TimeUnit.MILLISECONDS).create();
+        break;
+      case GET:
+        jwtLastLogin =
+            db.hashMap("jwtLastLogin", Serializer.STRING, Serializer.DATE)
+                .expireAfterGet(milliseconds, TimeUnit.MILLISECONDS).create();
+        break;
+      default:
+        jwtLastLogin = db
+            .hashMap("jwtLastLogin", Serializer.STRING, Serializer.DATE)
+            .expireAfterUpdate(milliseconds, TimeUnit.MILLISECONDS).create();
+    }
   }
 
   @Override
